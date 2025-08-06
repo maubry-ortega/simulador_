@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 use crate::{
-    components::{Creature, Velocity, Genes, State},
+    components::{Creature, Velocity, Genes, State, Predator},
     utils::mutate_color,
     resources::Stats,
 };
@@ -50,6 +50,40 @@ pub fn reproduction_system(
 
             stats.total_reproductions += 1;
             stats.max_generation = stats.max_generation.max(child_gen);
+        }
+    }
+}
+
+pub fn predator_reproduction_system(
+    mut commands: Commands,
+    mut query: Query<(&Transform, &Velocity, &mut Predator, &State)>,
+) {
+    let predators: Vec<_> = query.iter_mut().collect();
+    let mut spawned = 0;
+
+    if predators.len() >= 2 {
+        for (transform, velocity, mut predator, state) in predators {
+            if *state == State::ReproducingSeason && predator.reproduction_cooldown <= 0.0 && spawned < 1 {
+                commands.spawn((
+                    Sprite {
+                        color: Color::srgb(1.0, 0.0, 0.0),
+                        custom_size: Some(Vec2::splat(40.0)),
+                        ..default()
+                    },
+                    Transform::from_translation(transform.translation + Vec3::new(10.0, 10.0, 0.0)),
+                    GlobalTransform::default(),
+                    Visibility::Visible,
+                    Velocity(velocity.0),
+                    Predator {
+                        energy: 100.0,
+                        reproduction_cooldown: 10.0,
+                        generation: predator.generation + 1,
+                    },
+                    State::Wandering,
+                ));
+                predator.reproduction_cooldown = 10.0;
+                spawned += 1;
+            }
         }
     }
 }

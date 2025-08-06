@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 
-/// Información evolutiva de la criatura
 #[derive(Component)]
 pub struct Creature {
     pub energy: f32,
@@ -9,15 +8,19 @@ pub struct Creature {
     pub generation: u32,
 }
 
-/// Dirección y velocidad de movimiento
+#[derive(Component)]
+pub struct Predator {
+    pub energy: f32,
+    pub reproduction_cooldown: f32,
+    pub generation: u32,
+}
+
 #[derive(Component)]
 pub struct Velocity(pub Vec2);
 
-/// Representa comida en el mundo
 #[derive(Component)]
 pub struct Food;
 
-/// Información genética heredable
 #[derive(Clone, Component)]
 pub struct Genes {
     pub speed: f32,
@@ -25,14 +28,13 @@ pub struct Genes {
     pub color: Color,
 }
 
-/// Estado de comportamiento para IA simple
-#[derive(Component, PartialEq, Eq)]
+#[derive(Component, PartialEq, Eq, Debug)]
 pub enum State {
     Wandering,
     SeekingFood,
     Reproducing,
+    ReproducingSeason, // solo para depredadores
 }
 
-/// Texto de FPS en pantalla
 #[derive(Component)]
 pub struct FpsText;

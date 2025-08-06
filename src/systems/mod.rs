@@ -6,12 +6,15 @@ pub mod boundaries;
 pub mod food;
 pub mod hud;
 pub mod states;
+pub mod predator;
 
 pub use setup::*;
 pub use movement::*;
 pub use collisions::*;
 pub use reproduction::*;
+pub use reproduction::predator_reproduction_system;
 pub use boundaries::*;
 pub use food::*;
 pub use hud::*;
 pub use states::*;
+pub use predator::*;

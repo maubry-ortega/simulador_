@@ -1,10 +1,15 @@
 use bevy::prelude::*;
-use crate::{components::{Creature, Velocity, Genes, State, FpsText}, utils::color_from_generation, systems::food::spawn_food};
 use rand::prelude::*;
+use crate::{
+    components::{Creature, Velocity, Genes, State, FpsText, Predator},
+    utils::color_from_generation,
+    systems::food::spawn_food,
+};
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
 
+    // HUD
     commands.spawn((
         Text::new("FPS: "),
         TextFont {
@@ -38,6 +43,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     spawn_initial_creatures(&mut commands);
+    spawn_initial_predators(&mut commands);
     spawn_food(&mut commands);
 }
 
@@ -73,6 +79,36 @@ pub fn spawn_initial_creatures(commands: &mut Commands) {
             Velocity(dir),
             Genes { speed, size, color },
             State::Wandering,
+        ));
+    }
+}
+
+pub fn spawn_initial_predators(commands: &mut Commands) {
+    let mut rng = rand::rng();
+
+    // IMPORTANTE: revisa cuántos hay antes de spawnear más
+    // (esto se hace mejor dentro de un sistema con acceso a Query)
+    for _ in 0..2 {
+        commands.spawn((
+            Sprite {
+                color: Color::srgb(1.0, 0.0, 0.0),
+                custom_size: Some(Vec2::splat(40.0)),
+                ..default()
+            },
+            Transform::from_xyz(
+                rng.random_range(-300.0..=300.0),
+                rng.random_range(-200.0..=200.0),
+                0.0,
+            ),
+            GlobalTransform::default(),
+            Visibility::Visible,
+            Velocity(Vec2::from_angle(rng.random_range(0.0..=std::f32::consts::TAU)) * 80.0),
+            Predator {
+                energy: 100.0,
+                reproduction_cooldown: 0.0,
+                generation: 0,
+            },
+            State::ReproducingSeason,
         ));
     }
 }

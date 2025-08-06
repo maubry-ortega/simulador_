@@ -5,13 +5,21 @@ pub fn update_states(
     mut query: Query<(&Transform, &mut State, &Creature)>,
     _food_query: Query<&Transform, With<Food>>,
 ) {
-    for (_transform, mut state, creature) in query.iter_mut() {
-        if creature.energy < 50.0 {
-            *state = State::SeekingFood;
+    for (transform, mut state, creature) in query.iter_mut() {
+        let new_state = if creature.energy < 50.0 {
+            State::SeekingFood
         } else if creature.energy > 120.0 && creature.time_since_reproduction > 5.0 {
-            *state = State::Reproducing;
+            State::Reproducing
         } else {
-            *state = State::Wandering;
+            State::Wandering
+        };
+
+        if *state != new_state {
+            info!(
+                "🧠 Cambio de estado en criatura ({:?}): {:?} -> {:?}",
+                transform.translation, *state, new_state
+            );
+            *state = new_state;
         }
     }
 }
