@@ -1,6 +1,6 @@
+use crate::{components::Food, resources::Stats};
 use bevy::prelude::*;
 use rand::prelude::*;
-use crate::{components::Food, resources::Stats};
 
 pub fn spawn_food(commands: &mut Commands) {
     let mut rng = rand::rng();
@@ -23,11 +23,7 @@ pub fn spawn_food(commands: &mut Commands) {
     }
 }
 
-pub fn spawn_random_food(
-    mut commands: Commands,
-    mut stats: ResMut<Stats>,
-    time: Res<Time>,
-) {
+pub fn spawn_random_food(mut commands: Commands, mut stats: ResMut<Stats>, time: Res<Time>) {
     stats.time_since_spawn += time.delta_secs();
     if stats.time_since_spawn >= 5.0 {
         stats.time_since_spawn = 0.0;

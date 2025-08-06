@@ -1,31 +1,32 @@
+use crate::{
+    components::{Creature, FpsText, Genes, Predator, State, Velocity},
+    systems::food::spawn_food,
+    utils::color_from_generation,
+};
 use bevy::prelude::*;
 use rand::prelude::*;
-use crate::{
-    components::{Creature, Velocity, Genes, State, FpsText, Predator},
-    utils::color_from_generation,
-    systems::food::spawn_food,
-};
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
 
     // HUD
-    commands.spawn((
-        Text::new("FPS: "),
-        TextFont {
-            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-            font_size: 30.0,
-            ..default()
-        },
-    ))
-    .with_child((
-        TextSpan::from(""),
-        TextFont {
-            font_size: 24.0,
-            ..default()
-        },
-        FpsText,
-    ));
+    commands
+        .spawn((
+            Text::new("FPS: "),
+            TextFont {
+                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                font_size: 30.0,
+                ..default()
+            },
+        ))
+        .with_child((
+            TextSpan::from(""),
+            TextFont {
+                font_size: 24.0,
+                ..default()
+            },
+            FpsText,
+        ));
 
     commands.spawn((
         Text::new(""),
@@ -86,9 +87,11 @@ pub fn spawn_initial_creatures(commands: &mut Commands) {
 pub fn spawn_initial_predators(commands: &mut Commands) {
     let mut rng = rand::rng();
 
-    // IMPORTANTE: revisa cuántos hay antes de spawnear más
-    // (esto se hace mejor dentro de un sistema con acceso a Query)
     for _ in 0..2 {
+        let angle = rng.random_range(0.0..=std::f32::consts::TAU);
+        let speed = 90.0;
+        let dir = Vec2::from_angle(angle) * speed;
+
         commands.spawn((
             Sprite {
                 color: Color::srgb(1.0, 0.0, 0.0),
@@ -102,7 +105,7 @@ pub fn spawn_initial_predators(commands: &mut Commands) {
             ),
             GlobalTransform::default(),
             Visibility::Visible,
-            Velocity(Vec2::from_angle(rng.random_range(0.0..=std::f32::consts::TAU)) * 80.0),
+            Velocity(dir),
             Predator {
                 energy: 100.0,
                 reproduction_cooldown: 0.0,

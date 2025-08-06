@@ -1,5 +1,8 @@
+use crate::{
+    components::{Creature, Food, FpsText},
+    resources::Stats,
+};
 use bevy::prelude::*;
-use crate::{components::{Creature, Food, FpsText}, resources::Stats};
 
 pub fn update_hud(
     stats: Res<Stats>,

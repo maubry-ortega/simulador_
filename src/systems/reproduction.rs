@@ -1,10 +1,10 @@
+use crate::{
+    components::{Creature, Genes, Predator, State, Velocity},
+    resources::Stats,
+    utils::mutate_color,
+};
 use bevy::prelude::*;
 use rand::prelude::*;
-use crate::{
-    components::{Creature, Velocity, Genes, State, Predator},
-    utils::mutate_color,
-    resources::Stats,
-};
 
 pub fn reproduction_system(
     mut commands: Commands,
@@ -63,7 +63,10 @@ pub fn predator_reproduction_system(
 
     if predators.len() >= 2 {
         for (transform, velocity, mut predator, state) in predators {
-            if *state == State::ReproducingSeason && predator.reproduction_cooldown <= 0.0 && spawned < 1 {
+            if *state == State::ReproducingSeason
+                && predator.reproduction_cooldown <= 0.0
+                && spawned < 1
+            {
                 commands.spawn((
                     Sprite {
                         color: Color::srgb(1.0, 0.0, 0.0),

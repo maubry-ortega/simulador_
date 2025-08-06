@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::components::Velocity;
+use bevy::prelude::*;
 
 pub fn boundary_bounce_system(
     mut query: Query<(&mut Transform, &mut Velocity)>,

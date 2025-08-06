@@ -1,5 +1,5 @@
+use crate::components::{Creature, Food, Predator, State, Velocity};
 use bevy::prelude::*;
-use crate::components::{Creature, State, Velocity, Food};
 
 pub fn update_states(
     mut query: Query<(&Transform, &mut State, &Creature)>,
@@ -33,15 +33,56 @@ pub fn seek_food_system(
             continue;
         }
 
-        if let Some(closest_food) = foods.iter()
-            .min_by(|a, b| {
-                let dist_a = a.translation.truncate().distance_squared(creature_transform.translation.truncate());
-                let dist_b = b.translation.truncate().distance_squared(creature_transform.translation.truncate());
-                dist_a.total_cmp(&dist_b)
-            }) {
-
-            let direction = (closest_food.translation - creature_transform.translation).truncate().normalize_or_zero();
+        if let Some(closest_food) = foods.iter().min_by(|a, b| {
+            let dist_a = a
+                .translation
+                .truncate()
+                .distance_squared(creature_transform.translation.truncate());
+            let dist_b = b
+                .translation
+                .truncate()
+                .distance_squared(creature_transform.translation.truncate());
+            dist_a.total_cmp(&dist_b)
+        }) {
+            let direction = (closest_food.translation - creature_transform.translation)
+                .truncate()
+                .normalize_or_zero();
             velocity.0 = direction * 50.0;
+        }
+    }
+}
+
+pub fn avoid_predators_system(
+    predators: Query<&Transform, With<Predator>>,
+    mut creatures: Query<(&Transform, &mut Velocity, &State), With<Creature>>,
+) {
+    for (creature_transform, mut velocity, state) in creatures.iter_mut() {
+        if *state != State::Wandering && *state != State::SeekingFood {
+            continue;
+        }
+
+        if let Some(closest_predator) = predators.iter().min_by(|a, b| {
+            let dist_a = a
+                .translation
+                .truncate()
+                .distance_squared(creature_transform.translation.truncate());
+            let dist_b = b
+                .translation
+                .truncate()
+                .distance_squared(creature_transform.translation.truncate());
+            dist_a.total_cmp(&dist_b)
+        }) {
+            let distance = creature_transform
+                .translation
+                .truncate()
+                .distance(closest_predator.translation.truncate());
+            if distance < 100.0 {
+                // Huir en dirección opuesta
+                let direction = (creature_transform.translation - closest_predator.translation)
+                    .truncate()
+                    .normalize_or_zero();
+                velocity.0 = direction * 80.0;
+            }
         }
     }
 }

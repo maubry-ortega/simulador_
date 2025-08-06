@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::components::{Creature, Predator, Velocity};
+use bevy::prelude::*;
 
 pub fn move_entities(
     time: Res<Time>,
