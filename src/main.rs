@@ -2,7 +2,7 @@ use bevy::{
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     prelude::*,
 };
-use rand::prelude::*;
+use rand::prelude::*; // Asegúrate de que esto incluye el trait Rng
 
 #[derive(Component)]
 struct Creature {
@@ -53,7 +53,6 @@ fn color_from_generation(r#gen: u32) -> Color {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
 
-    // FPS text
     commands
         .spawn((
             Text::new("FPS: "),
@@ -65,7 +64,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_child((TextSpan::from(""), TextFont { font_size: 24.0, ..default() }, FpsText));
 
-    // HUD text
     commands.spawn((
         Text::new(""),
         TextFont {
@@ -87,19 +85,17 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn move_creatures(
     time: Res<Time>,
-    mut query: Query<(&Velocity, &mut Transform, &mut Creature)>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &Velocity, &mut Transform, &mut Creature)>,
 ) {
-    for (velocity, mut transform, mut creature) in query.iter_mut() {
+    for (entity, velocity, mut transform, mut creature) in query.iter_mut() {
         transform.translation += velocity.0.extend(0.0) * time.delta_secs();
         creature.energy -= 0.1 * time.delta_secs();
         creature.age += time.delta_secs();
         creature.time_since_reproduction += time.delta_secs();
 
-        if creature.energy <= 0.0 {
-            transform.translation = Vec3::ZERO;
-            creature.energy = 100.0;
-            creature.age = 0.0;
-            creature.time_since_reproduction = 0.0;
+        if creature.energy <= 0.0 || creature.age > 60.0 {
+            commands.entity(entity).despawn();
         }
     }
 }
@@ -114,7 +110,9 @@ fn food_collision_system(
             let dist = creature_transform.translation.truncate().distance(food_transform.translation.truncate());
             if dist < 15.0 {
                 creature.energy += 20.0;
-                commands.entity(food_entity).despawn();
+                if commands.get_entity(food_entity).is_ok() {
+                    let _ = commands.entity(food_entity).despawn();
+                }
                 break;
             }
         }
@@ -126,15 +124,16 @@ fn reproduction_system(
     mut stats: ResMut<Stats>,
     mut query: Query<(&mut Creature, &Transform, &Velocity)>,
 ) {
-    let mut rng = rand::rng();
+    let mut rng = rand::rng(); // Mantener rand::rng() según tu código
 
     for (mut creature, transform, velocity) in query.iter_mut() {
         if creature.energy > 120.0 && creature.time_since_reproduction > 5.0 {
             creature.energy -= 40.0;
             creature.time_since_reproduction = 0.0;
 
-            let vx = velocity.0.x + rng.gen_range(-5.0..5.0);
-            let vy = velocity.0.y + rng.gen_range(-5.0..5.0);
+            // Corregido: Usar random_range en lugar de gen_range
+            let vx = velocity.0.x + rng.random_range(-5.0..=5.0);
+            let vy = velocity.0.y + rng.random_range(-5.0..=5.0);
             let child_gen = creature.generation + 1;
 
             commands.spawn((
@@ -183,10 +182,11 @@ fn boundary_bounce_system(
 }
 
 fn spawn_initial_creatures(commands: &mut Commands) {
-    let mut rng = rand::rng();
+    let mut rng = rand::rng(); // Mantener rand::rng() según tu código
     for _ in 0..10 {
-        let angle = rng.gen_range(0.0..std::f32::consts::TAU);
-        let speed = rng.gen_range(20.0..60.0);
+        // Corregido: Usar random_range en lugar de gen_range
+        let angle = rng.random_range(0.0..=std::f32::consts::TAU);
+        let speed = rng.random_range(20.0..=60.0);
         let dir = Vec2::from_angle(angle) * speed;
         commands.spawn((
             Sprite {
@@ -194,7 +194,7 @@ fn spawn_initial_creatures(commands: &mut Commands) {
                 custom_size: Some(Vec2::splat(30.0)),
                 ..default()
             },
-            Transform::from_xyz(rng.gen_range(-300.0..300.0), rng.gen_range(-200.0..200.0), 0.0),
+            Transform::from_xyz(rng.random_range(-300.0..=300.0), rng.random_range(-200.0..=200.0), 0.0),
             GlobalTransform::default(),
             Visibility::Visible,
             Creature {
@@ -209,7 +209,7 @@ fn spawn_initial_creatures(commands: &mut Commands) {
 }
 
 fn spawn_food(commands: &mut Commands) {
-    let mut rng = rand::rng();
+    let mut rng = rand::rng(); // Mantener rand::rng() según tu código
     for _ in 0..20 {
         commands.spawn((
             Sprite {
@@ -217,7 +217,7 @@ fn spawn_food(commands: &mut Commands) {
                 custom_size: Some(Vec2::splat(10.0)),
                 ..default()
             },
-            Transform::from_xyz(rng.gen_range(-300.0..300.0), rng.gen_range(-200.0..200.0), 0.0),
+            Transform::from_xyz(rng.random_range(-300.0..=300.0), rng.random_range(-200.0..=200.0), 0.0),
             GlobalTransform::default(),
             Visibility::Visible,
             Food,
