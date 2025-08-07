@@ -6,12 +6,16 @@ use bevy::prelude::*;
 
 /// Actualiza el texto del HUD con estadísticas vivas del ecosistema.
 pub fn update_hud(
-    stats: Res<Stats>,
+    mut stats: ResMut<Stats>,
+    time: Res<Time>,
     creatures: Query<(&Organism, &Creature)>,
     predators: Query<&Predator>,
     plants: Query<(), With<Plant>>,
     mut texts: Query<&mut Text>,
 ) {
+    // Actualizar tiempo de simulación
+    stats.simulation_time += time.delta_secs();
+
     if let Some(mut text) = texts.iter_mut().last() {
         let total_creatures = creatures.iter().count();
         let total_predators = predators.iter().count();

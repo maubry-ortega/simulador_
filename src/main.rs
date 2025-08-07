@@ -37,6 +37,8 @@ fn main() {
 
                 // Depredadores
                 systems::predator_hunting_system,
+                systems::update_predator_cooldowns,
+                systems::update_predator_states,
 
                 // Reproducción
                 systems::reproduction_system,

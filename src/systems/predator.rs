@@ -1,9 +1,11 @@
 use crate::components::{Creature, Genes, Organism, Predator, State, Velocity};
+use crate::resources::Stats;
 use bevy::prelude::*;
 
 /// Sistema de caza: los depredadores buscan presas si tienen hambre y están en temporada de reproducción.
 pub fn predator_hunting_system(
     mut commands: Commands,
+    mut stats: ResMut<Stats>,
     mut predators: Query<(
         &Transform,
         &mut Velocity,
@@ -56,6 +58,7 @@ pub fn predator_hunting_system(
             if distance < 25.0 {
                 commands.entity(closest_entity).despawn();
                 predator_org.energy = (predator_org.energy + 40.0).min(150.0); // Recupera energía
+                stats.total_deaths += 1;
             }
         } else {
             // No hay presas cerca: queda inmóvil

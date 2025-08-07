@@ -1,3 +1,5 @@
+pub mod factory;
+
 use bevy::prelude::*;
 use rand::prelude::*;
 

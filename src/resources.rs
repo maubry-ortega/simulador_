@@ -5,7 +5,6 @@ use bevy::prelude::*;
 pub struct Stats {
     pub total_reproductions: usize,
     pub total_deaths: usize,
-    pub time_since_spawn: f32,
     pub max_generation: u32,
     pub simulation_time: f32,
 }

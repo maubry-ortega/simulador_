@@ -82,7 +82,7 @@ pub fn herbivore_plant_collision_system(
     mut query: Query<(Entity, &Transform, &mut Organism), With<Creature>>,
     plants: Query<(Entity, &Transform), With<Plant>>,
 ) {
-    for (creature_entity, creature_transform, mut organism) in query.iter_mut() {
+    for (_creature_entity, creature_transform, mut organism) in query.iter_mut() {
         for (plant_entity, plant_transform) in plants.iter() {
             let distance = creature_transform
                 .translation
