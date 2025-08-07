@@ -1,5 +1,5 @@
 use crate::{
-    components::{Creature, Food, FpsText, Organism, Predator},
+    components::{Creature, FpsText, Organism, Predator, Plant},
     resources::Stats,
 };
 use bevy::prelude::*;
@@ -9,13 +9,13 @@ pub fn update_hud(
     stats: Res<Stats>,
     creatures: Query<(&Organism, &Creature)>,
     predators: Query<&Predator>,
-    foods: Query<(), With<Food>>,
+    plants: Query<(), With<Plant>>,
     mut texts: Query<&mut Text>,
 ) {
     if let Some(mut text) = texts.iter_mut().last() {
         let total_creatures = creatures.iter().count();
         let total_predators = predators.iter().count();
-        let food_count = foods.iter().count();
+        let plant_count = plants.iter().count();
 
         let avg_gen = if total_creatures > 0 {
             creatures.iter().map(|(org, _)| org.generation).sum::<u32>() as f32
@@ -27,7 +27,7 @@ pub fn update_hud(
         *text = Text::new(format!(
             "🧬 Criaturas: {}\n\
              🦊 Depredadores: {}\n\
-             🥬 Comida: {}\n\
+             🌿 Plantas: {}\n\
              🔁 Reproducciones: {}\n\
              💀 Muertes: {}\n\
              📈 Máx Gen: {}\n\
@@ -35,7 +35,7 @@ pub fn update_hud(
              ⏱️ Tiempo: {:.1}s",
             total_creatures,
             total_predators,
-            food_count,
+            plant_count,
             stats.total_reproductions,
             stats.total_deaths,
             stats.max_generation,

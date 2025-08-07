@@ -26,14 +26,14 @@ fn main() {
                 systems::avoid_entity_overlap_system,
                 systems::boundary_bounce_system,
 
-                // Sistemas de alimentación
-                systems::food_collision_system,
-                systems::spawn_random_food,
-                systems::seek_food_system,
-
                 // IA y comportamiento
+                systems::seek_food_system,
                 systems::update_states,
                 systems::avoid_predators_system,
+
+                // Plantas y alimentación
+                systems::plant_growth_and_reproduction_system,
+                systems::herbivore_plant_collision_system,
 
                 // Depredadores
                 systems::predator_hunting_system,

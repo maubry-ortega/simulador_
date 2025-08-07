@@ -7,7 +7,6 @@ pub struct Organism {
     pub generation: u32,
 }
 
-
 #[derive(Component)]
 pub struct Creature {
     pub time_since_reproduction: f32,
@@ -21,9 +20,6 @@ pub struct Predator {
 #[derive(Component)]
 pub struct Velocity(pub Vec2);
 
-#[derive(Component)]
-pub struct Food;
-
 #[derive(Clone, Component)]
 pub struct Genes {
     pub speed: f32,
@@ -36,8 +32,16 @@ pub enum State {
     Wandering,
     SeekingFood,
     Reproducing,
-    ReproducingSeason, // solo para depredadores
+    ReproducingSeason,
 }
 
 #[derive(Component)]
 pub struct FpsText;
+
+#[derive(Component)]
+pub struct Plant {
+    pub age: f32,
+    pub max_age: f32,
+    pub size: f32,
+    pub reproduction_timer: f32,
+}

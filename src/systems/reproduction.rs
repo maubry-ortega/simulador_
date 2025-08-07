@@ -1,5 +1,5 @@
 use crate::{
-    components::{Creature, Genes, Organism, State, Velocity, Predator},
+    components::{Creature, Genes, Organism, Predator, State, Velocity},
     resources::Stats,
     utils::mutate_color,
 };
@@ -16,7 +16,6 @@ pub fn reproduction_system(
 
     for (mut creature, mut organism, transform, velocity, genes) in query.iter_mut() {
         if organism.energy > 120.0 && creature.time_since_reproduction > 5.0 {
-            // Gasta energía y reinicia el contador de reproducción
             organism.energy -= 40.0;
             creature.time_since_reproduction = 0.0;
 
@@ -58,7 +57,6 @@ pub fn reproduction_system(
     }
 }
 
-
 /// Los depredadores se reproducen si hay al menos dos, están en temporada, y su cooldown terminó.
 pub fn predator_reproduction_system(
     mut commands: Commands,
@@ -68,7 +66,7 @@ pub fn predator_reproduction_system(
     let mut spawned = 0;
 
     if predators.len() >= 2 {
-        for (transform, velocity, mut predator,organism, state) in predators {
+        for (transform, velocity, mut predator, organism, state) in predators {
             if *state == State::ReproducingSeason
                 && predator.reproduction_cooldown <= 0.0
                 && spawned < 1
@@ -100,5 +98,98 @@ pub fn predator_reproduction_system(
                 spawned += 1;
             }
         }
+    }
+}
+
+/// Disminuye el cooldown de reproducción con el tiempo.
+pub fn update_predator_cooldowns(time: Res<Time>, mut query: Query<&mut Predator>) {
+    for mut predator in query.iter_mut() {
+        predator.reproduction_cooldown -= time.delta_secs();
+    }
+}
+
+/// Decide si los depredadores están en temporada de reproducción.
+pub fn update_predator_states(mut query: Query<(&mut State, &Organism), With<Predator>>) {
+    for (mut state, organism) in query.iter_mut() {
+        let new_state = if organism.energy > 110.0 {
+            State::ReproducingSeason
+        } else {
+            State::Wandering
+        };
+
+        *state = new_state;
+    }
+}
+
+/// Spawnea criaturas iniciales al comenzar la simulación.
+pub fn spawn_initial_creatures(commands: &mut Commands) {
+    let mut rng = rand::rng();
+    for _ in 0..10 {
+        commands.spawn((
+            Sprite {
+                color: Color::srgb(0.0, 1.0, 0.0),
+                custom_size: Some(Vec2::splat(20.0)),
+                ..default()
+            },
+            Transform::from_xyz(
+                rng.random_range(-400.0..400.0),
+                rng.random_range(-300.0..300.0),
+                0.0,
+            ),
+            GlobalTransform::default(),
+            Visibility::Visible,
+            Creature {
+                time_since_reproduction: 0.0,
+            },
+            Organism {
+                energy: 100.0,
+                age: 0.0,
+                generation: 0,
+            },
+            Velocity(Vec2::new(
+                rng.random_range(-30.0..30.0),
+                rng.random_range(-30.0..30.0),
+            )),
+            Genes {
+                speed: 50.0,
+                size: 20.0,
+                color: Color::srgb(0.0, 1.0, 0.0),
+            },
+            State::Wandering,
+        ));
+    }
+}
+
+/// Spawnea depredadores iniciales.
+pub fn spawn_initial_predators(commands: &mut Commands) {
+    let mut rng = rand::rng();
+    for _ in 0..2 {
+        commands.spawn((
+            Sprite {
+                color: Color::srgb(1.0, 0.0, 0.0),
+                custom_size: Some(Vec2::splat(40.0)),
+                ..default()
+            },
+            Transform::from_xyz(
+                rng.random_range(-400.0..400.0),
+                rng.random_range(-300.0..300.0),
+                0.0,
+            ),
+            GlobalTransform::default(),
+            Visibility::Visible,
+            Predator {
+                reproduction_cooldown: 5.0,
+            },
+            Organism {
+                energy: 100.0,
+                age: 0.0,
+                generation: 0,
+            },
+            Velocity(Vec2::new(
+                rng.random_range(-50.0..50.0),
+                rng.random_range(-50.0..50.0),
+            )),
+            State::Wandering,
+        ));
     }
 }

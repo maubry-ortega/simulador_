@@ -1,4 +1,4 @@
-use crate::components::{Creature, Food, Organism, Predator, State, Velocity};
+use crate::components::{Creature, Plant, Organism, Predator, State, Velocity};
 use bevy::prelude::*;
 
 /// Sistema que decide en qué estado está cada criatura (comer, reproducirse o vagar)
@@ -27,20 +27,20 @@ pub fn update_states(
 /// Sistema que mueve criaturas hambrientas hacia la comida más cercana
 pub fn seek_food_system(
     mut creatures: Query<(&Transform, &mut Velocity, &State), With<Creature>>,
-    foods: Query<&Transform, With<Food>>,
+    plants: Query<&Transform, With<Plant>>,
 ) {
     for (creature_transform, mut velocity, state) in creatures.iter_mut() {
         if *state != State::SeekingFood {
             continue;
         }
 
-        if let Some(closest_food) = foods.iter().min_by(|a, b| {
+        if let Some(closest_plant) = plants.iter().min_by(|a, b| {
             let pos = creature_transform.translation.truncate();
             let da = a.translation.truncate().distance_squared(pos);
             let db = b.translation.truncate().distance_squared(pos);
             da.total_cmp(&db)
         }) {
-            let direction = (closest_food.translation - creature_transform.translation)
+            let direction = (closest_plant.translation - creature_transform.translation)
                 .truncate()
                 .normalize_or_zero();
             velocity.0 = direction * 50.0;
