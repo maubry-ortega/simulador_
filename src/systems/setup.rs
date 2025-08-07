@@ -1,15 +1,17 @@
 use crate::{
-    components::{Creature, FpsText, Genes, Predator, State, Velocity},
+    components::{Creature, FpsText, Genes, Organism, Predator, State, Velocity},
     systems::food::spawn_food,
     utils::color_from_generation,
 };
 use bevy::prelude::*;
 use rand::prelude::*;
 
+/// Configuración inicial de la simulación: cámara, HUD, entidades base.
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // Cámara 2D
     commands.spawn(Camera2d);
 
-    // HUD
+    // HUD FPS en la esquina
     commands
         .spawn((
             Text::new("FPS: "),
@@ -28,6 +30,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             FpsText,
         ));
 
+    // HUD de estadísticas de simulación
     commands.spawn((
         Text::new(""),
         TextFont {
@@ -43,11 +46,13 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
+    // Entidades base
     spawn_initial_creatures(&mut commands);
     spawn_initial_predators(&mut commands);
     spawn_food(&mut commands);
 }
 
+/// Crea las criaturas iniciales con atributos aleatorios.
 pub fn spawn_initial_creatures(commands: &mut Commands) {
     let mut rng = rand::rng();
 
@@ -71,19 +76,22 @@ pub fn spawn_initial_creatures(commands: &mut Commands) {
             ),
             GlobalTransform::default(),
             Visibility::Visible,
+            Velocity(dir),
             Creature {
+                time_since_reproduction: 0.0,
+            },
+            Organism {
                 energy: 100.0,
                 age: 0.0,
-                time_since_reproduction: 0.0,
                 generation: 0,
             },
-            Velocity(dir),
             Genes { speed, size, color },
             State::Wandering,
         ));
     }
 }
 
+/// Crea los depredadores iniciales con valores definidos.
 pub fn spawn_initial_predators(commands: &mut Commands) {
     let mut rng = rand::rng();
 
@@ -107,8 +115,11 @@ pub fn spawn_initial_predators(commands: &mut Commands) {
             Visibility::Visible,
             Velocity(dir),
             Predator {
-                energy: 100.0,
                 reproduction_cooldown: 0.0,
+            },
+            Organism {
+                energy: 100.0,
+                age: 0.0,
                 generation: 0,
             },
             State::ReproducingSeason,

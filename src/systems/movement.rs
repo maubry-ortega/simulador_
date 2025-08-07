@@ -1,34 +1,42 @@
-use crate::components::{Creature, Predator, Velocity};
+use crate::components::{Creature, Organism, Predator, Velocity};
 use bevy::prelude::*;
 
+/// Mueve criaturas y depredadores, aplica consumo de energía, envejecimiento y muerte.
 pub fn move_entities(
     time: Res<Time>,
     mut commands: Commands,
     mut params: ParamSet<(
-        Query<(Entity, &Velocity, &mut Transform, &mut Creature)>,
-        Query<(Entity, &Velocity, &mut Transform, &mut Predator)>,
+        Query<(Entity, &Velocity, &mut Transform, &mut Organism, &mut Creature)>,
+        Query<(Entity, &Velocity, &mut Transform, &mut Organism, &mut Predator)>,
     )>,
 ) {
-    // Movimiento de criaturas
-    for (entity, velocity, mut transform, mut creature) in params.p0().iter_mut() {
+    // 🟢 Movimiento y lógica para criaturas (herbívoras)
+    for (entity, velocity, mut transform, mut organism, mut creature) in params.p0().iter_mut() {
         transform.translation += velocity.0.extend(0.0) * time.delta_secs();
-        creature.energy -= 0.1 * time.delta_secs();
-        creature.age += time.delta_secs();
+
+        organism.energy -= 1.0 * time.delta_secs();
+        organism.age += time.delta_secs();
         creature.time_since_reproduction += time.delta_secs();
 
-        if creature.energy <= 0.0 || creature.age > 60.0 {
+        // Muerte por edad o agotamiento
+        if organism.energy <= 0.0 || organism.age > 60.0 {
             commands.entity(entity).despawn();
         }
     }
 
-    // Movimiento de depredadores
-    for (entity, velocity, mut transform, mut predator) in params.p1().iter_mut() {
+    // 🔴 Movimiento y lógica para depredadores
+    for (entity, velocity, mut transform, mut organism, predator) in params.p1().iter_mut() {
         transform.translation += velocity.0.extend(0.0) * time.delta_secs();
-        predator.energy -= 0.08 * time.delta_secs();
-        predator.reproduction_cooldown += time.delta_secs();
 
-        if predator.energy <= 0.0 {
+        organism.energy -= 0.8 * time.delta_secs();
+        organism.age += time.delta_secs();
+
+        // Muerte por agotamiento
+        if organism.energy <= 0.0 {
             commands.entity(entity).despawn();
         }
+
+        // Nota: cooldown de reproducción se actualiza en otro sistema
+        // o puedes añadirlo aquí si se necesita
     }
 }

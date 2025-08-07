@@ -1,18 +1,21 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Creature {
+pub struct Organism {
     pub energy: f32,
     pub age: f32,
-    pub time_since_reproduction: f32,
     pub generation: u32,
+}
+
+
+#[derive(Component)]
+pub struct Creature {
+    pub time_since_reproduction: f32,
 }
 
 #[derive(Component)]
 pub struct Predator {
-    pub energy: f32,
     pub reproduction_cooldown: f32,
-    pub generation: u32,
 }
 
 #[derive(Component)]

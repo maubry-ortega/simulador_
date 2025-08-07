@@ -21,19 +21,30 @@ fn main() {
         .add_systems(
             Update,
             (
+                // Movimiento y colisiones
                 systems::move_entities,
+                systems::avoid_entity_overlap_system,
+                systems::boundary_bounce_system,
+
+                // Sistemas de alimentación
                 systems::food_collision_system,
+                systems::spawn_random_food,
+                systems::seek_food_system,
+
+                // IA y comportamiento
+                systems::update_states,
+                systems::avoid_predators_system,
+
+                // Depredadores
+                systems::predator_hunting_system,
+
+                // Reproducción
                 systems::reproduction_system,
                 systems::predator_reproduction_system,
-                systems::boundary_bounce_system,
-                systems::spawn_random_food,
-                systems::predator_hunting_system,
-                systems::predator_seek_prey_system,
+
+                // HUD
                 systems::update_hud,
                 systems::update_fps,
-                systems::update_states,
-                systems::seek_food_system,
-                systems::avoid_predators_system,
             ),
         )
         .run();
